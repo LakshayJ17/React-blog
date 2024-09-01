@@ -262,3 +262,56 @@ export class Service {
 const service = new Service()
 export default service
 ```
+
+### src -> store folder -> store.js
+```
+import { configureStore } from "@reduxjs/toolkit";
+
+const store = configureStore({
+    reducer: {
+        
+    }
+});
+
+export default store;
+```
+
+src -> store folder -> authSlice.js
+```
+import { createSlice } from "@reduxjs/toolkit";
+
+const initialState = {
+    status: false,
+    userData: null
+}
+const authSlice = createSlice({
+    name: 'auth',
+    initialState,
+    reducers: {
+        login: (state, action) => {
+            state.status = true;
+            state.userData = action.payload.userData;
+        },
+        logout: (state) => {
+            state.status = false;
+            userData = null;
+        }
+    }
+})
+
+export default authSlice.reducer;
+export const { login, logout } = authSlice.actions;
+
+```
+
+### src -> components -> Header -> Header.jsx
+### src -> components -> Footer -> Footer.jsx
+### src -> components -> index.js
+```
+import Header from "./Header/Header";
+import Footer from "./Footer/Footer";
+
+export{
+    Header, Footer
+}
+```
