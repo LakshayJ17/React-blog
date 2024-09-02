@@ -266,10 +266,10 @@ export default service
 ### src -> store folder -> store.js
 ```
 import { configureStore } from "@reduxjs/toolkit";
-
+import authSlice from "./authSlice";
 const store = configureStore({
     reducer: {
-        
+        auth : authSlice,
     }
 });
 
@@ -314,4 +314,63 @@ import Footer from "./Footer/Footer";
 export{
     Header, Footer
 }
+```
+
+### App.jsx
+```
+import { useState, useEffect } from 'react'
+import './App.css'
+import { useDispatch } from 'react-redux'
+import authService from './appwrite/auth'
+import { login, logout } from './store/authSlice'
+import { Footer, Header } from './components'
+
+function App() {
+  const [loading, setLoading] = useState(true)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    authService.getCurrentUser()
+      .then((userData) => {
+        if (userData) {
+          dispatch(login(userData))
+        } else {
+          dispatch(logout())
+        }
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  return !loading ? (
+    <div className='min-h-screen flex flex-wrap content-between bg-gray-400'>
+      <div className='w-full block'>
+        <Header />
+        <main>
+          Todo : {/* <Outlet /> */}
+        </main>
+        <Footer />
+      </div>
+    </div>
+  ) : null
+}
+
+export default App
+
+```
+
+### main.jsx
+```
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+import { Provider } from 'react-redux'
+import store from './store/store.js'
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </StrictMode>,
+)
 ```
