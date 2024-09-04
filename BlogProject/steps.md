@@ -264,7 +264,7 @@ export default service
 ```
 
 ### src -> store folder -> store.js
-```
+```javascript
 import { configureStore } from "@reduxjs/toolkit";
 import authSlice from "./authSlice";
 const store = configureStore({
@@ -276,8 +276,8 @@ const store = configureStore({
 export default store;
 ```
 
-src -> store folder -> authSlice.js
-```
+### src -> store folder -> authSlice.js
+```javascript
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -294,7 +294,7 @@ const authSlice = createSlice({
         },
         logout: (state) => {
             state.status = false;
-            userData = null;
+            state.userData = null;
         }
     }
 })
@@ -305,19 +305,253 @@ export const { login, logout } = authSlice.actions;
 ```
 
 ### src -> components -> Header -> Header.jsx
-### src -> components -> Footer -> Footer.jsx
-### src -> components -> index.js
+
+```javascript
+
+import React from 'react'
+import { Container, Logo, LogoutBtn } from '../index'
+import { Link, useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+
+function Header() {
+  // To check if user is authenticated
+  const authStatus = useSelector((state) => state.auth.status)
+  const navigate = useNavigate()
+
+  const navItems = [
+    {
+      name: 'Home',
+      slug: "/",
+      active: true
+    },
+    {
+      name: "Login",
+      slug: "/login",
+      active: !authStatus,
+    },
+    {
+      name: "Signup",
+      slug: "/signup",
+      active: !authStatus,
+    },
+    {
+      name: "All Posts",
+      slug: "/all-posts",
+      active: authStatus,
+    },
+    {
+      name: "Add Post",
+      slug: "/add-post",
+      active: authStatus,
+    },
+  ]
+
+  return (
+    <header className='py-3 shadow bg-gray-500'>
+      <Container>
+        <nav className='flex'>
+          <div className='mr-4'>
+            <Link to='/'>
+              <Logo width='70px' />
+            </Link>
+          </div>
+          <ul className='flex ml-auto'>
+            {navItems.map((item) =>
+              item.active ? (
+                // the element which is repeating has the key
+                <li key={item.name}>
+                  <button
+                    className='inline-block px-6 py-2 duration-200 hover:bg-blue-100 rounded-full'
+                    onClick={() => navigate(item.slug)}>
+                    {item.name}
+                  </button>
+                </li>
+              ) : null)}
+
+              {/* If authenticated then show logout button */}
+              {authStatus && (
+                <li>
+                  <LogoutBtn />
+                </li>
+              )}
+          </ul>
+        </nav>
+      </Container>
+    </header>
+  )
+}
+
+export default Header
+
 ```
+### src -> components -> Footer -> Footer.jsx
+```javascript
+import Footer from "./Footer/Footer";
+import React from 'react'
+import { Link } from 'react-router-dom'
+import Logo from '../Logo'
+
+function Footer() {
+  return (
+    <section className="relative overflow-hidden py-10 bg-gray-400 border border-t-2 border-t-black">
+            <div className="relative z-10 mx-auto max-w-7xl px-4">
+                <div className="-m-6 flex flex-wrap">
+                    <div className="w-full p-6 md:w-1/2 lg:w-5/12">
+                        <div className="flex h-full flex-col justify-between">
+                            <div className="mb-4 inline-flex items-center">
+                                <Logo width="100px" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">
+                                    &copy; Copyright 2023. All Rights Reserved by DevUI.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="w-full p-6 md:w-1/2 lg:w-2/12">
+                        <div className="h-full">
+                            <h3 className="tracking-px mb-9  text-xs font-semibold uppercase text-gray-500">
+                                Company
+                            </h3>
+                            <ul>
+                                <li className="mb-4">
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Features
+                                    </Link>
+                                </li>
+                                <li className="mb-4">
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Pricing
+                                    </Link>
+                                </li>
+                                <li className="mb-4">
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Affiliate Program
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Press Kit
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="w-full p-6 md:w-1/2 lg:w-2/12">
+                        <div className="h-full">
+                            <h3 className="tracking-px mb-9  text-xs font-semibold uppercase text-gray-500">
+                                Support
+                            </h3>
+                            <ul>
+                                <li className="mb-4">
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Account
+                                    </Link>
+                                </li>
+                                <li className="mb-4">
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Help
+                                    </Link>
+                                </li>
+                                <li className="mb-4">
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Contact Us
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Customer Support
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="w-full p-6 md:w-1/2 lg:w-3/12">
+                        <div className="h-full">
+                            <h3 className="tracking-px mb-9  text-xs font-semibold uppercase text-gray-500">
+                                Legals
+                            </h3>
+                            <ul>
+                                <li className="mb-4">
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Terms &amp; Conditions
+                                    </Link>
+                                </li>
+                                <li className="mb-4">
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Privacy Policy
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        className=" text-base font-medium text-gray-900 hover:text-gray-700"
+                                        to="/"
+                                    >
+                                        Licensing
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+  )
+}
+
+export default Footer
+```
+
+### src -> components -> index.js
+``` javascript
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
+import Container from "./container/container";
+import Logo from "./Logo";
+import LogoutBtn from "./Header/LogoutBtn";
 
 export{
-    Header, Footer
+    Header, 
+    Footer,
+    Container,
+    Logo,
+    LogoutBtn
 }
+
 ```
 
 ### App.jsx
-```
+```javascript
 import { useState, useEffect } from 'react'
 import './App.css'
 import { useDispatch } from 'react-redux'
@@ -359,7 +593,7 @@ export default App
 ```
 
 ### main.jsx
-```
+```javascript
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
@@ -374,3 +608,53 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 ```
+
+### components -> container folder -> Container.jsx
+``` javascript
+import React from 'react'
+
+function Container({children}) {
+  return <div className='w-full max-w-7 mx-auto px-4 '>{children}</div>;
+  
+}
+
+export default Container
+```
+### components -> Logo.jsx
+``` javascript
+import React from 'react'
+
+function Logo({width = '100px'}) {
+  return (
+    <div>
+      Logo
+    </div>
+  )
+}
+
+export default Logo
+```
+
+### components -> Header folder -> LogoutBtn.jsx
+``` javascript
+import React from 'react'
+import { useDispatch } from 'react-redux'
+import authService from '../../appwrite/auth'
+import { logout } from '../../store/authSlice'
+
+function LogoutBtn() {
+    const dispatch = useDispatch()
+    const logoutHandler = () => {
+        authService.logout().then(() => {
+            dispatch(logout())
+        })
+
+    }
+    return (
+        <button className='inline-block px-6 py-2 duration-200 hover:bg-blue-100 rounded-full'>Logout</button>
+    )
+}
+
+export default LogoutBtn
+```
+
