@@ -1,10 +1,17 @@
 import React from 'react'
 
-function Button() {
+function Button({
+  children,
+  type = 'button',
+  bgColor = 'bg-blue-600',
+  textColor = '',
+  // If user pass something else
+  ...props
+}) {
   return (
-    <div>
-      
-    </div>
+    <button className={`px-4 py-2 rounded-lg ${bgColor} ${textColor} ${className}`} {...props}>
+      {children}
+    </button>
   )
 }
 
