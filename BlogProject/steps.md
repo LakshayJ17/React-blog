@@ -600,6 +600,7 @@ import App from './App.jsx'
 import './index.css'
 import { Provider } from 'react-redux'
 import store from './store/store.js'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
@@ -656,6 +657,62 @@ function LogoutBtn() {
 }
 
 export default LogoutBtn
+
+```
+
+### src ->components -> Button.jsx
+```javascript
+import React from 'react'
+
+function Button({
+  children,
+  type = 'button',
+  bgColor = 'bg-blue-600',
+  textColor = '',
+  // If user pass something else
+  ...props
+}) {
+  return (
+    <button className={`px-4 py-2 rounded-lg ${bgColor} ${textColor} ${className}`} {...props}>
+      {children}
+    </button>
+  )
+}
+
+export default Button
+
+```
+
+### src -> components -> Input.jsx
+```javascript
+import React, { useId } from 'react'
+
+const Input = React.forwardRef(function Input({
+    label,
+    type = "text",
+    className = "",
+    ...props
+}, ref) {
+    const id = useId()
+    return (
+        <div className='w-full '>
+            {/* if label present then show <label> */}
+            {label && <label className='inline-block mb-1 pl-1' htmlFor={id}>
+                {label}
+            </label>
+            }
+            <input
+                type={type}
+                className={`px-3 py-2 rounded-lg bg-white text-black outline-none focus:bg-gray-50 duration-200 border border-gray-200 w-full ${className}`}
+                ref={ref}
+                {...props}
+                id={id}
+            />
+        </div>
+    )
+})
+
+export default Input
 
 ```
 
