@@ -19,7 +19,6 @@ function PostForm({ post }) {
     const navigate = useNavigate()
     const userData = useSelector(state => state.user.userData) 
 
-    
     // If user has submited form
     const submit = async (data) => {
         // If post is there
