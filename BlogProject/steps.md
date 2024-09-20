@@ -534,18 +534,36 @@ export default Footer
 
 ### src -> components -> index.js
 ``` javascript
+import Select from "./Select";
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
-import Container from "./container/container";
+import Container from "./container/Container";
 import Logo from "./Logo";
 import LogoutBtn from "./Header/LogoutBtn";
+import RTE from "./RTE";
+import SignUp from "../pages/Signup";
+import Login from "./Login";
+import Button from "./Button";
+import PostForm from "./post-form/PostForm";
+import PostCard from "./PostCard";
+import AuthLayout from "./AuthLayout";
+import Input from "./Input";
 
-export{
-    Header, 
+export {
+    Header,
     Footer,
     Container,
     Logo,
-    LogoutBtn
+    LogoutBtn,
+    RTE,
+    SignUp,
+    Login,
+    Button,
+    PostForm,
+    PostCard,
+    AuthLayout, 
+    Input,
+    Select,
 }
 
 ```
@@ -592,24 +610,6 @@ export default App
 
 ```
 
-### main.jsx
-```javascript
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
-import { Provider } from 'react-redux'
-import store from './store/store.js'
-
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </StrictMode>,
-)
-```
-
 ### components -> container folder -> Container.jsx
 ``` javascript
 import React from 'react'
@@ -639,9 +639,9 @@ export default Logo
 ### components -> Header folder -> LogoutBtn.jsx
 ``` javascript
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import {useDispatch} from 'react-redux'
 import authService from '../../appwrite/auth'
-import { logout } from '../../store/authSlice'
+import {logout} from '../../store/authSlice'
 
 function LogoutBtn() {
     const dispatch = useDispatch()
@@ -649,11 +649,13 @@ function LogoutBtn() {
         authService.logout().then(() => {
             dispatch(logout())
         })
-
     }
-    return (
-        <button className='inline-block px-6 py-2 duration-200 hover:bg-blue-100 rounded-full'>Logout</button>
-    )
+  return (
+    <button
+    className='inline-bock px-6 py-2 duration-200 hover:bg-blue-100 rounded-full'
+    onClick={logoutHandler}
+    >Logout</button>
+  )
 }
 
 export default LogoutBtn
@@ -1192,7 +1194,333 @@ function PostForm({ post }) {
 }
 
 export default PostForm
+```
 
+### src -> pages -> AddPost.jsx
+```javascript
+import React from 'react'
+import { Container, PostForm } from '../components'
+function AddPost() {
+  return (
+    <div className='py-8'>
+      <Container>
+        <PostForm />
+      </Container>
+    </div>
+  )
+}
+
+export default AddPost
+```
+### src -> pages -> AllPosts.jsx
+```javascript
+import React, { useState, useEffect } from 'react'
+import appwriteService from '../appwrite/config'
+import { Container, PostCard } from '../components'
+
+function AllPosts() {
+    const [posts, setPosts] = useState([])
+    useEffect(() => { }, [])
+    appwriteService.getPosts([]).then((posts) => {
+        if (posts) {
+            setPosts(posts.documents)
+        }
+    })
+    return (
+        <div className='w-full py-8'>
+            <Container>
+                <div className='flex flex-wrap'>
+                    {posts.map((post) => {
+                        <div key={post.$id} className='p-2 w-1/4'>
+                            <PostCard post={post} />
+                        </div>
+                    })}
+                </div>
+            </Container>
+        </div>
+    )
+}
+
+export default AllPosts
 
 ```
+### src -> pages -> EditPost.jsx
+```javascript
+import React, { useEffect, useState } from 'react'
+import { Container, PostForm } from '../components'
+import appwriteService from '../appwrite/config'
+import { useNavigate, useParams } from 'react-router-dom'
+
+function EditPost() {
+    const [post, setPosts] = useState(null)
+    //  To extract values from url
+    const { slug } = useParams()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (slug) {
+            appwriteService.getPost(slug).then((post) => {
+                if (post) {
+                    setPosts(post)
+                }
+            })
+        } else {
+            navigate('/')
+        }
+    }, [slug, navigate])
+
+    return post ? (
+        <div className='py-8'>
+            <Container>
+                <PostForm post={post} />
+            </Container>
+        </div>
+    ) : null
+}
+
+export default EditPost
+
+```
+### src -> pages -> Home.jsx
+```javascript
+import React, { useEffect, useState } from 'react'
+import appwriteService from '../appwrite/config'
+import { Container, PostCard } from '../components'
+
+function Home() {
+    const [posts, setPosts] = useState([])
+
+    useEffect(() => {
+        appwriteService.getPosts().then((posts) => {
+            if (posts) {
+                setPosts(posts.documents)
+            }
+        })
+    }, [])
+
+
+    if (posts.length === 0) {
+        return (
+            <div className="w-full py-8 mt-4 text-center">
+                <Container>
+                    <div className="flex flex-wrap">
+                        <div className="p-2 w-full">
+                            <h1 className="text-2xl font-bold hover:text-gray-500">
+                                Login to read posts
+                            </h1>
+                        </div>
+                    </div>
+                </Container>
+            </div>
+        )
+    }
+    return (
+        <div className='w-full py-8'>
+            <Container>
+                <div className='flex flex-wrap'>
+                    {posts.map((post) => (
+                        <div key={post.$id} className='p-2 w-1/4'>
+                            <PostCard {...post} />
+                        </div>
+                    ))}
+                </div>
+            </Container>
+        </div>
+    )
+}
+
+export default Home
+```
+### src -> pages -> Login.jsx
+```javascript
+import React from 'react'
+import {Login as loginComponent} from '../components'
+
+function Login() {
+  return (
+    <div className='py-8'>
+      <loginComponent />
+    </div>
+  )
+}
+
+export default Login
+
+```
+### src -> pages -> Post.jsx
+```javascript
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import appwriteService from "../appwrite/config";
+import { Button, Container } from "../components";
+import parse from "html-react-parser";
+import { useSelector } from "react-redux";
+
+export default function Post() {
+    const [post, setPost] = useState(null);
+    const { slug } = useParams();
+    const navigate = useNavigate();
+
+    const userData = useSelector((state) => state.auth.userData);
+
+    const isAuthor = post && userData ? post.userId === userData.$id : false;
+
+    useEffect(() => {
+        if (slug) {
+            appwriteService.getPost(slug).then((post) => {
+                if (post) setPost(post);
+                else navigate("/");
+            });
+        } else navigate("/");
+    }, [slug, navigate]);
+
+    const deletePost = () => {
+        appwriteService.deletePost(post.$id).then((status) => {
+            if (status) {
+                appwriteService.deleteFile(post.featuredImage);
+                navigate("/");
+            }
+        });
+    };
+
+    return post ? (
+        <div className="py-8">
+            <Container>
+                <div className="w-full flex justify-center mb-4 relative border rounded-xl p-2">
+                    <img
+                        src={appwriteService.getFilePreview(post.featuredImage)}
+                        alt={post.title}
+                        className="rounded-xl"
+                    />
+
+                    {isAuthor && (
+                        <div className="absolute right-6 top-6">
+                            <Link to={`/edit-post/${post.$id}`}>
+                                <Button bgColor="bg-green-500" className="mr-3">
+                                    Edit
+                                </Button>
+                            </Link>
+                            <Button bgColor="bg-red-500" onClick={deletePost}>
+                                Delete
+                            </Button>
+                        </div>
+                    )}
+                </div>
+                <div className="w-full mb-6">
+                    <h1 className="text-2xl font-bold">{post.title}</h1>
+                </div>
+                <div className="browser-css">
+                    {parse(post.content)}
+                </div>
+            </Container>
+        </div>
+    ) : null;
+}
+```
+### src -> pages -> SignUp.jsx
+```javascript
+import React from 'react'
+import { SignUp as SignupComponent } from '../components'
+function SignUp() {
+    return (
+        <div className='py-8'>
+            <SignupComponent />
+        </div>
+    )
+}
+
+export default SignUp
+
+```
+
+### main.jsx
+```javascript
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+import { Provider } from 'react-redux'
+import store from './store/store.js'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import Home from './pages/Home.jsx'
+import { AuthLayout, Login } from './components/index.js'
+
+
+import AddPost from "./pages/AddPost";
+import Signup from './pages/Signup'
+import EditPost from "./pages/EditPost";
+
+import Post from "./pages/Post";
+
+import AllPosts from "./pages/AllPosts";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+        {
+            path: "/",
+            element: <Home />,
+        },
+        {
+            path: "/login",
+            element: (
+                <AuthLayout authentication={false}>
+                    <Login />
+                </AuthLayout>
+            ),
+        },
+        {
+            path: "/signup",
+            element: (
+                <AuthLayout authentication={false}>
+                    <Signup />
+                </AuthLayout>
+            ),
+        },
+        {
+            path: "/all-posts",
+            element: (
+                <AuthLayout authentication>
+                    {" "}
+                    <AllPosts />
+                </AuthLayout>
+            ),
+        },
+        {
+            path: "/add-post",
+            element: (
+                <AuthLayout authentication>
+                    {" "}
+                    <AddPost />
+                </AuthLayout>
+            ),
+        },
+        {
+            path: "/edit-post/:slug",
+            element: (
+                <AuthLayout authentication>
+                    {" "}
+                    <EditPost />
+                </AuthLayout>
+            ),
+        },
+        {
+            path: "/post/:slug",
+            element: <Post />,
+        },
+    ],
+},
+])
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Provider store={store}>
+    <RouterProvider router={router}/>
+    </Provider>
+  </React.StrictMode>,
+)
+```
+
 
