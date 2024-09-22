@@ -539,14 +539,13 @@ import Container from "./container/Container";
 import Logo from "./Logo";
 import LogoutBtn from "./Header/LogoutBtn";
 import RTE from "./RTE";
-import SignUp from "../pages/Signup";
+import Signup from "./Signup";
 import Login from "./Login";
 import Button from "./Button";
 import PostForm from "./post-form/PostForm";
 import PostCard from "./PostCard";
 import AuthLayout from "./AuthLayout";
 import Input from "./Input";
-
 export {
     Header,
     Footer,
@@ -554,7 +553,7 @@ export {
     Logo,
     LogoutBtn,
     RTE,
-    SignUp,
+    Signup,
     Login,
     Button,
     PostForm,
@@ -662,24 +661,22 @@ export default LogoutBtn
 
 ### src ->components -> Button.jsx
 ```javascript
-import React from 'react'
+import React from "react";
 
-function Button({
-  children,
-  type = 'button',
-  bgColor = 'bg-blue-600',
-  textColor = '',
-  // If user pass something else
-  ...props
+export default function Button({
+    children,
+    type = "button",
+    bgColor = "bg-blue-600",
+    textColor = "text-white",
+    className = "",
+    ...props
 }) {
-  return (
-    <button className={`px-4 py-2 rounded-lg ${bgColor} ${textColor} ${className}`} {...props}>
-      {children}
-    </button>
-  )
+    return (
+        <button className={`px-4 py-2 rounded-lg ${bgColor} ${textColor} ${className}`} {...props}>
+            {children}
+        </button>
+    );
 }
-
-export default Button
 
 ```
 
@@ -1055,14 +1052,14 @@ export default function RTE({ name, control, label, defaultValue = "" }) {
 
 #### src -> components -> post-form folder -> PostForm.jsx
 ```javascript
-import React, { useCallback } from 'react'
-import { useForm } from 'react-hook-form'
-import { Button, Input, Select, RTE } from '../index'
-import appwriteService from '../../appwrite/config'
-import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import React, { useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { Button, Input, RTE, Select } from "..";
+import appwriteService from "../../appwrite/config";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-function PostForm({ post }) {
+export default function PostForm({ post }) {
     // Get info from useForm
     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
         defaultValues: {
@@ -1072,73 +1069,66 @@ function PostForm({ post }) {
             status: post?.status || "active",
         },
     });
-
-    const navigate = useNavigate()
-    const userData = useSelector(state => state.user.userData)
-
+    
+    const navigate = useNavigate();
+    const userData = useSelector((state) => state.auth.userData);
     // If user has submited form
     const submit = async (data) => {
         // If post is there
         if (post) {
             // Data gives access to image, if there is image use appwriteService
-            const file = data.image[0] ? appwriteService.uploadFile(data.image[0]) : null
-
+            const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
             // Delete the previous image bcz we are uploading new
             if (file) {
-                appwriteService.deleteFile(post.featuredImage)
+                appwriteService.deleteFile(post.featuredImage);
             }
             // Update the post , slug = post ID
-
             const dbPost = await appwriteService.updatePost(post.$id, {
                 ...data,
                 //  if file is there , uski id featured image m daal denge
                 featuredImage: file ? file.$id : undefined,
-            })
+            });
+
             if (dbPost) {
-                navigate(`/post/${dbPost.$id}`)
+                navigate(`/post/${dbPost.$id}`);
             }
-        }
+
         // If post not there
-        else {
-            const file = await appwriteService.uploadFile(data.image[0])
+        } else {
+            const file = await appwriteService.uploadFile(data.image[0]);
 
             if (file) {
-                const fileId = file.$id
-                data.featuredImage = fileId
-                const dbPost = await appwriteService.createPost({
-                    ...data,
-                    userId: userData.$id,
-                })
+                const fileId = file.$id;
+                data.featuredImage = fileId;
+                const dbPost = await appwriteService.createPost({ ...data, userId: userData.$id });
+
                 if (dbPost) {
-                    navigate(`/post/${dbPost.$id}`)
+                    navigate(`/post/${dbPost.$id}`);
                 }
             }
         }
-    }
+    };
 
     const slugTransform = useCallback((value) => {
-        if (value && typeof (value) === 'string') return value
-            .trim()
-            .toLowerCase()
-            .replace(/^[a-zA-Z\d\s]+/g, '-')
-            .replace(/\s/g, '-')
+        if (value && typeof value === "string")
+            return value
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-zA-Z\d\s]+/g, "-")
+                .replace(/\s/g, "-");
 
-        return ''
-
-    }, [])
+        return "";
+    }, []);
 
     React.useEffect(() => {
         const subscription = watch((value, { name }) => {
-            if (name === 'title') {
-                setValue('slug', slugTransform(value.title, { shouldValidate: true }))
+            if (name === "title") {
+                setValue("slug", slugTransform(value.title), { shouldValidate: true });
             }
-        })
+        });
 
-        return () => {
-            subscription.unsubscribe()
-        }
-
-    }, [watch, slugTransform, setValue])
+        return () => subscription.unsubscribe();
+    }, [watch, slugTransform, setValue]);
 
     return (
         <form onSubmit={handleSubmit(submit)} className="flex flex-wrap">
@@ -1188,10 +1178,10 @@ function PostForm({ post }) {
                 </Button>
             </div>
         </form>
-    )
+    );
 }
 
-export default PostForm
+
 ```
 
 ### src -> pages -> AddPost.jsx
@@ -1212,31 +1202,32 @@ export default AddPost
 ```
 ### src -> pages -> AllPosts.jsx
 ```javascript
-import React, { useState, useEffect } from 'react'
-import appwriteService from '../appwrite/config'
+
+import React, {useState, useEffect} from 'react'
 import { Container, PostCard } from '../components'
+import appwriteService from "../appwrite/config";
 
 function AllPosts() {
     const [posts, setPosts] = useState([])
-    useEffect(() => { }, [])
+    useEffect(() => {}, [])
     appwriteService.getPosts([]).then((posts) => {
         if (posts) {
             setPosts(posts.documents)
         }
     })
-    return (
-        <div className='w-full py-8'>
-            <Container>
-                <div className='flex flex-wrap'>
-                    {posts.map((post) => {
-                        <div key={post.$id} className='p-2 w-1/4'>
-                            <PostCard post={post} />
-                        </div>
-                    })}
-                </div>
+  return (
+    <div className='w-full py-8'>
+        <Container>
+            <div className='flex flex-wrap'>
+                {posts.map((post) => (
+                    <div key={post.$id} className='p-2 w-1/4'>
+                        <PostCard {...post} />
+                    </div>
+                ))}
+            </div>
             </Container>
-        </div>
-    )
+    </div>
+  )
 }
 
 export default AllPosts
@@ -1415,11 +1406,11 @@ export default function Post() {
     ) : null;
 }
 ```
-### src -> pages -> SignUp.jsx
+### src -> pages -> Signup.jsx
 ```javascript
 import React from 'react'
-import { SignUp as SignupComponent } from '../components'
-function SignUp() {
+import { Signup as SignupComponent } from '../components'
+function Signup() {
     return (
         <div className='py-8'>
             <SignupComponent />
@@ -1427,7 +1418,7 @@ function SignUp() {
     )
 }
 
-export default SignUp
+export default Signup
 
 ```
 
