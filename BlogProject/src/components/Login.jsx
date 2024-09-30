@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { login as authLogin } from '../store/authSlice';
 import authService from '../appwrite/auth';
-import { Button, Input, Logo } from './index';
+import { Button, Input, Logo } from './index.js';
 
 function Login() {
     const navigate = useNavigate();
@@ -12,6 +12,26 @@ function Login() {
     const { register, handleSubmit } = useForm();
     const [error, setError] = useState("");
 
+    // const login = async (data) => {
+    //     setError("");
+    //     try {
+    //         console.log("Attempting to login with data:", data);
+    //         const session = await authService.login(data);
+    //         console.log("Session:", session);
+    //         if (session) {
+    //             const userData = await authService.getCurrentUser();
+    //             console.log("User data:", userData);
+    //             if (userData) {
+    //                 dispatch(authLogin(userData));
+    //                 console.log("Navigating to home");
+    //                 navigate("/");
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error("Login error:", error);
+    //         setError(error.message);
+    //     }
+    // };
     const login = async (data) => {
         setError("");
         try {
@@ -24,14 +44,19 @@ function Login() {
                 if (userData) {
                     dispatch(authLogin(userData));
                     console.log("Navigating to home");
-                    navigate("/");
+                    navigate("/"); // Check if this line is reached
+                } else {
+                    console.error("No user data returned after login.");
                 }
+            } else {
+                console.error("No session returned.");
             }
         } catch (error) {
             console.error("Login error:", error);
-            setError(error.message);
+            setError(error.message || "Login failed. Please try again.");
         }
     };
+     
 
     return (
         <div className='flex items-center justify-center w-full'>
